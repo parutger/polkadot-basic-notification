@@ -1,0 +1,8 @@
+node_modules
+dist
+.idea
+.env
+config/main.json
+config/secret.json
+config.json*
+yarn-error.log
