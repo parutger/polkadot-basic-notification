@@ -1,11 +1,11 @@
 {
     "name": "polkadot-bare-notification",
     "version": "1.0.0",
-    "main": "index.js",
+    "main": "dist/index.js",
     "license": "MIT",
     "scripts": {
         "build": "tsc",
-        "lint": "npx eslint src --ext .ts"
+        "lint": "npx eslint src --ext .ts --fix"
     },
     "devDependencies": {
         "@tsconfig/node16": "^1.0.2",
