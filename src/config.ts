@@ -2,20 +2,10 @@ import yargs from "yargs";
 import { readFileSync } from 'fs';
 import { Address } from "@polkadot/types/interfaces/runtime";
 
-// my best effort at creating rust-style enums, as per explained here:
-//  https://www.jmcelwa.in/posts/rust-like-enums/
-interface Only {
-    only: string[],
-}
-interface Ignore {
-    ignore: string[]
-}
-type FilterSubscription = "all" | Only | Ignore;
-
 
 export interface ExtendedAccount {
     address: Address,
-    nickname: string
+    label: string
 }
 
 export interface MatrixConfig {
@@ -27,8 +17,8 @@ export interface MatrixConfig {
 
 export interface AppConfig {
     endpoints: string[],
-    accounts: [string, string][],
-    filter_subscription: FilterSubscription,
+    accounts: ExtendedAccount[],
+    eventFilter: "all" | string[],
     matrix: MatrixConfig,
 }
 
@@ -50,6 +40,14 @@ export class Config {
         }
 
         this.config = JSON.parse(readFileSync(argv.c).toString());
+        if (this.config.accounts == undefined) {
+            console.warn("No 'accounts' section found in config, defaulting to '[]'");
+            this.config.accounts = []
+        }
+        if (this.config.eventFilter == undefined) {
+            console.warn("No 'eventFilter' section found in config, defaulting to 'all'");
+            this.config.eventFilter = "all"
+        }
 
     }
 

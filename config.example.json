@@ -1,0 +1,21 @@
+{
+    "accounts": [
+        { "address": "<SS58>", "label": "Account1-label"},
+        { "address": "<SS58>", "label": "Account2-label"}
+    ],
+    "endpoints": [
+        "wss://westend-rpc.polkadot.io",
+        "wss://westmint-rpc.polkadot.io"
+    ],
+    "eventFilter-example1": "all",
+    "eventFilter": [
+        "balances.Transfer",
+        "democracy.Passed"
+    ],
+    "matrix": {
+           "userId": "<>",
+           "accessToken": "<>",
+           "server": "<https://matrix.your.home.server>",
+           "roomId": "<!roomID:matrix.server>"
+    }
+}

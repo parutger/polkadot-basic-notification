@@ -1,6 +1,9 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Header } from "@polkadot/types/interfaces/runtime";
 
+import "@polkadot/api-augment";
+import "@polkadot/types-augment";
+
 export class Chainmon {
     private provider!: WsProvider;
     private api!: ApiPromise;
@@ -30,8 +33,8 @@ export class Chainmon {
         const blockApi = await this.api.at(blockheader.hash);
         const timestamp = (await blockApi.query.timestamp.now()).toBn().toNumber()
         const events = await blockApi.query.system.events();
-        //const signedBlock = await this.api.rpc.chain.getBlock(blockheader.hash);
-        //const extrinsics = signedBlock.block.extrinsics;
+        const signedBlock = await this.api.rpc.chain.getBlock(blockheader.hash);
+        const extrinsics = signedBlock.block.extrinsics;
 
         // downstream functions need these values.
         // TODO: define interface for this
@@ -40,22 +43,25 @@ export class Chainmon {
             number: blockheader.number.toNumber(),
             hash: blockheader.hash,
             timestamp: timestamp,
-            events: events
+            events: events,
+            extrinsics: extrinsics
         };
     }
 }
 
-//async function test() {
-//    try {
-//        const myx = new Chainmon('wss://rpc.polkadot.io');
-//        await myx.init();
-//        myx.subscribeHandler(async (blockheader: Header) => {
-//            const data = await myx.getBlockData(blockheader);
-//            console.log(`Block ${data.number} has hash ${data.hash} on ${data.chain}, has ${data.events.length} events`);
-//        });
-//    } catch (err) {
-//        console.error(err);
-//    }
-//}
-//
-//test().catch(console.error)
+/*
+async function test() {
+    try {
+        const myx = new Chainmon('wss://rpc.polkadot.io');
+        await myx.init();
+        myx.subscribeHandler(async (blockheader: Header) => {
+            const data = await myx.getBlockData(blockheader);
+            console.log(`Block ${data.number} has hash ${data.hash} on ${data.chain}, has ${data.events.length} events`);
+        });
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+test().catch(console.error)
+*/

@@ -3,6 +3,8 @@ import { GenericExtrinsic, GenericEvent } from "@polkadot/types/";
 import { Codec } from "@polkadot/types-codec/types";
 
 import * as sdk from "matrix-js-sdk";
+
+// To shut up the console.info log that matrix defaults with.
 import { logger } from 'matrix-js-sdk/lib/logger';
 import log from "loglevel";
 
