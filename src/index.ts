@@ -1,5 +1,6 @@
 import { Config, AppConfig } from "./config"
 import { Chainmon } from "./chainmon";
+import { Endpoint } from "./endpoints";
 import { MatrixReporter } from "./reporters/index"
 
 import { Header } from "@polkadot/types/interfaces/runtime";
@@ -26,12 +27,14 @@ async function main() {
         process.exit(1);
     }
 
+    const readiness = new Endpoint();
+    readiness.listen();
+
     // This function is passed to the blockhandler and is called every block.
     const Handler = async (blockheader: Header, chain: Chainmon) => {
         const data = await chain.getBlockData(blockheader);
 
-
-        let extrinsics = [];
+        const extrinsics = [];
         for (const extrinsic of data.extrinsics) {
             if (extrinsic.isSigned === true) {
                 // if accounts is not empty,  and extrinsic.signer.value) is not found in the accounts addresses, skip this one
@@ -52,7 +55,7 @@ async function main() {
             }
         }
 
-        let events = [];
+        const events = [];
         for (const event of data.events) {
             // if eventFilter is NOT "all" and the event is not in eventFilter: Skip
             if (config.eventFilter !== "all" &&
@@ -93,6 +96,7 @@ async function main() {
         )
     );
 
+    readiness.ready = true;
 }
 
 main().catch(console.error);

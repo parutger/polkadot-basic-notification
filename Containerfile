@@ -2,8 +2,6 @@
 # --------------------
 FROM node:lts-alpine as base
 
-RUN apk add --no-cache tini
-
 WORKDIR /app
 RUN chown node:node /app
 USER node
@@ -60,5 +58,8 @@ COPY --from=builder /app/dist ./dist
 # --------------------
 FROM preprod as production
 
+#health probe
+EXPOSE 3000
+
 VOLUME ["/config"]
-CMD ["/sbin/tini", "--", "node", "dist/index.js"]
+CMD ["node", "dist/index.js"]
