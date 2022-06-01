@@ -7,6 +7,7 @@ import "@polkadot/api-augment";
 import "@polkadot/types-augment";
 
 export interface ExtrinsicItem {
+    index: number,
     section: string,
     method: string,
     account: ExtendedAccount,
@@ -18,7 +19,7 @@ export interface EventItem {
     data: any, // TODO Fix
 }
 
-// This holds the raw blockdata, 
+// This holds the raw blockdata,
 // the blockhandler extracts relevant data into a "Report" item.
 export interface blockData {
     chain: string,
@@ -96,7 +97,8 @@ export function ReportHTML(report: Report) {
     if (typeof report.extrinsics !== 'undefined') {
         listExtrinsics = report.extrinsics.map((item) => `
             <li>
-               Extrinsic | <b style='background-color: #a3e4d7'> ${item.account.address.toString()} </b> ${item.account.label} 
+               Extrinsic <a href='https://${report.chain}.subscan.io/extrinsic/${report.blocknumber}-${item.index}'>#${report.blocknumber}-${item.index}</a></br>
+               | <b style='background-color: #a3e4d7'> ${item.account.address.toString()} </b> ${item.account.label}
                | method: <b style="background-color: #a3e4d7" > ${item.section}.${item.method} </b>
             </li>`);
     }

@@ -41,29 +41,31 @@ async function main() {
 
         // For each extrinsic
         const extrinsicItems: ExtrinsicItem[] = [];
-        for (const extrinsic of data.extrinsics) {
+        data.extrinsics.forEach((extrinsic, index) => {
             if (extrinsic.isSigned === true) {
                 // if accounts is not empty,  and extrinsic.signer.value) is not found in the accounts addresses, skip this one
                 if (config.accounts.length !== 0 &&
                     (config.accounts.some((obj) => { return obj.address == extrinsic.signer; }) === false)
-                ) continue;
-
+                ) return;
+                console.log(extrinsic);
                 // Grab the label for the account
                 const label = config.accounts.find(t => t.address == extrinsic.signer)?.label;
                 // Populate item
                 const item: ExtrinsicItem = {
+                    index: index,
                     section: extrinsic.method.section.toString(),
                     method: extrinsic.method.method.toString(),
                     account: {
                         address: extrinsic.signer,
                         label: label ?? "unlabeled"
                     },
+
                 };
                 // Log to stdout and add to report
                 console.log(JSON.stringify(item));
                 extrinsicItems.push(item);
             }
-        }
+        });
 
         // For each Event
         const eventItems: EventItem[] = [];
