@@ -32,9 +32,14 @@ async function main() {
 
 
     // This function is passed to the blockhandler and is called every block.
+    // Here is the main application logic that determines if a report is created
+    // and which extrinsics/events are included
+    //
     const Handler = async (blockheader: Header, chain: Chainmon) => {
+        // Retrieve the data from the block
         const data = await chain.getBlockData(blockheader);
 
+        // For each extrinsic
         const extrinsicItems: ExtrinsicItem[] = [];
         for (const extrinsic of data.extrinsics) {
             if (extrinsic.isSigned === true) {
@@ -43,7 +48,9 @@ async function main() {
                     (config.accounts.some((obj) => { return obj.address == extrinsic.signer; }) === false)
                 ) continue;
 
+                // Grab the label for the account
                 const label = config.accounts.find(t => t.address == extrinsic.signer)?.label;
+                // Populate item
                 const item: ExtrinsicItem = {
                     section: extrinsic.method.section.toString(),
                     method: extrinsic.method.method.toString(),
@@ -52,12 +59,13 @@ async function main() {
                         label: label ?? "unlabeled"
                     },
                 };
-
+                // Log to stdout and add to report
                 console.log(JSON.stringify(item));
                 extrinsicItems.push(item);
             }
         }
 
+        // For each Event
         const eventItems: EventItem[] = [];
         for (const event of data.events) {
             // if eventFilter is NOT "all" and the event is not in eventFilter: Skip
@@ -71,10 +79,12 @@ async function main() {
                 data: event.event.data.toJSON(),
             };
 
+            // Log to stdout and add to report
             console.log(JSON.stringify(item));
             eventItems.push(item);
         }
 
+        // Create a report if there is anything to.. report.
         if (extrinsicItems.length !== 0 || eventItems.length !== 0) {
             const report: Report = {
                 chain: chain.chain,
@@ -84,20 +94,21 @@ async function main() {
                 extrinsics: extrinsicItems,
                 events: eventItems,
             }
-
+            // Make a pretty html and send it to the matrix channel
             const message = ReportHTML(report);
             matrix.sendHTML(message);
         }
     };
 
     await Promise.all(
-        //For each endpoint
+        //For each endpoint, create a mon and assign a blockhandler
         config.endpoints.map(
             async function(endpoint) {
+                // Create a chainmon and initialize it.
                 const chain = new Chainmon(endpoint);
                 await chain.init();
 
-                //Here we use that blockhandler we made earlier
+                //Here we use that blockhandler function we made earlier
                 chain.subscribeHandler(async (blockheader: Header) => {
                     Handler(blockheader, chain);
                 });

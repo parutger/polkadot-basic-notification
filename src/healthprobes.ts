@@ -1,5 +1,10 @@
 import { createServer, Server } from 'http';
 
+/* 
+ * This is a very simplified readiness probe that responds to any url with a status code
+ * Can be further extended to provide metrics and 
+ */
+
 export class Healthprobe {
 
     private port = 3000;
@@ -10,7 +15,7 @@ export class Healthprobe {
     constructor() {
         this.server = createServer();
 
-        this.server.on('request', async (req, res) => {
+        this.server.on('request', async (_, res) => {
             if (this.ready) {
                 res.writeHead(200);
                 res.end('OK');
