@@ -49,6 +49,11 @@ export class Config {
             this.config.eventFilter = "all"
         }
 
+        // Environment variable overwrites config entry
+        if (typeof process.env.MATRIX_TOKEN !== undefined) {
+            this.config.matrix.accessToken = process.env.MATRIX_TOKEN || this.config.matrix.accessToken;
+        }
+
     }
 
 }
