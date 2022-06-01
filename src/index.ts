@@ -1,7 +1,7 @@
 import { Config, AppConfig } from "./config"
-import { Chainmon } from "./chainmon";
+import { Chainmon, Report, ExtrinsicItem, EventItem, ReportHTML } from "./chainmon";
 import { Endpoint } from "./endpoints";
-import { MatrixReporter } from "./reporters/index"
+import { MatrixReporter } from "./matrixreporter";
 
 import { Header } from "@polkadot/types/interfaces/runtime";
 import "@polkadot/api-augment";
@@ -9,6 +9,9 @@ import "@polkadot/types-augment";
 
 
 async function main() {
+    //Prepare readiness probe, defaults to false.
+    const readiness = new Endpoint();
+    readiness.listen();
 
     let config: AppConfig;
     try {
@@ -27,57 +30,63 @@ async function main() {
         process.exit(1);
     }
 
-    const readiness = new Endpoint();
-    readiness.listen();
 
     // This function is passed to the blockhandler and is called every block.
     const Handler = async (blockheader: Header, chain: Chainmon) => {
         const data = await chain.getBlockData(blockheader);
 
-        const extrinsics = [];
+        const extrinsicItems: ExtrinsicItem[] = [];
         for (const extrinsic of data.extrinsics) {
             if (extrinsic.isSigned === true) {
                 // if accounts is not empty,  and extrinsic.signer.value) is not found in the accounts addresses, skip this one
                 if (config.accounts.length !== 0 &&
-                    (config.accounts.some((obj) => { return obj.address === extrinsic.signer.value; }) === false)
+                    (config.accounts.some((obj) => { return obj.address == extrinsic.signer; }) === false)
                 ) continue;
 
-                const extrobj = {
-                    "chain": chain.chain,
-                    "block": data.number,
-                    "type": "extrinsic",
-                    "section": extrinsic.method.section,
-                    "method": extrinsic.method.method,
-                    "signer": extrinsic.signer.value.toString(),
+                const label = config.accounts.find(t => t.address == extrinsic.signer)?.label;
+                const item: ExtrinsicItem = {
+                    section: extrinsic.method.section.toString(),
+                    method: extrinsic.method.method.toString(),
+                    account: {
+                        address: extrinsic.signer,
+                        label: label ?? "unlabeled"
+                    },
                 };
-                console.log(extrobj);
-                extrinsics.push(extrobj);
+
+                console.log(JSON.stringify(item));
+                extrinsicItems.push(item);
             }
         }
 
-        const events = [];
+        const eventItems: EventItem[] = [];
         for (const event of data.events) {
             // if eventFilter is NOT "all" and the event is not in eventFilter: Skip
             if (config.eventFilter !== "all" &&
                 (config.eventFilter.some((obj) => { return obj === event.event.section + "." + event.event.method; }) === false)
             ) continue;
 
-
-            const eventobj = {
-                "chain": chain.chain,
-                "block": data.number,
-                "type": "event",
-                "section": event.event.section,
-                "method": event.event.method,
-                "data": event.event.data.toString()
+            const item: EventItem = {
+                section: event.event.section.toString(),
+                method: event.event.method.toString(),
+                data: event.event.data.toJSON(),
             };
-            console.log(eventobj);
-            events.push(eventobj);
+
+            console.log(JSON.stringify(item));
+            eventItems.push(item);
         }
 
-        if ((extrinsics.length !== 0) || (events.length !== 0)) {
-            // This will be a small report of the interesting events in this block
-            matrix.send(`Block https://${chain.chain}.subscan.io/block/${data.number} chain ${chain.chain} matches on ${extrinsics.length} extrinsics and ${events.length} events `);
+        if (extrinsicItems.length !== 0 || eventItems.length !== 0) {
+            const report: Report = {
+                chain: chain.chain,
+                blocknumber: data.number,
+                hash: data.hash,
+                timestamp: data.timestamp,
+                extrinsics: extrinsicItems,
+                events: eventItems,
+            }
+
+            const message = ReportHTML(report);
+            matrix.sendHTML(message);
         }
     };
 
@@ -95,7 +104,7 @@ async function main() {
             }
         )
     );
-
+    // Light up the readiness probe
     readiness.ready = true;
 }
 

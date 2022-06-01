@@ -23,5 +23,5 @@ export class Endpoint {
 
     async listen() {
         this.server.listen(this.port);
-    };
+    }
 }
