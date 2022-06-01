@@ -1,6 +1,6 @@
 import { createServer, Server } from 'http';
 
-export class Endpoint {
+export class Healthprobe {
 
     private port = 3000;
     private server: Server;

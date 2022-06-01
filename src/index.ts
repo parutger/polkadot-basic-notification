@@ -1,6 +1,6 @@
 import { Config, AppConfig } from "./config"
 import { Chainmon, Report, ExtrinsicItem, EventItem, ReportHTML } from "./chainmon";
-import { Endpoint } from "./endpoints";
+import { Healthprobe } from "./healthprobes";
 import { MatrixReporter } from "./matrixreporter";
 
 import { Header } from "@polkadot/types/interfaces/runtime";
@@ -10,7 +10,7 @@ import "@polkadot/types-augment";
 
 async function main() {
     //Prepare readiness probe, defaults to false.
-    const readiness = new Endpoint();
+    const readiness = new Healthprobe();
     readiness.listen();
 
     let config: AppConfig;
