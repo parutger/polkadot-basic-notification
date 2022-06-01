@@ -20,7 +20,7 @@ export class Healthprobe {
                 res.writeHead(200);
                 res.end('OK');
             } else {
-                res.writeHead(500);
+                res.writeHead(503);
                 res.end('NOT READY');
             }
         });
