@@ -16,7 +16,8 @@ export interface ExtrinsicItem {
 export interface EventItem {
     section: string,
     method: string,
-    data: any, // TODO Fix
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any, // any is correct for now because it's a mutable type
 }
 
 // This holds the raw blockdata,
@@ -26,7 +27,8 @@ export interface blockData {
     number: number,
     hash: Hash,
     timestamp: number,
-    events: any[], // TODO fix
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    events: any[], //any is correct for now because it's a mutable type
     extrinsics: GenericExtrinsic[]
 }
 
