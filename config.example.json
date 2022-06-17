@@ -12,9 +12,23 @@
         "democracy.Passed"
     ],
     "matrix": {
-           "userId": "<>",
-           "accessToken": "<>",
-           "server": "<https://matrix.your.home.server>",
-           "roomId": "<!roomID:matrix.server>"
+        "userId": "<your userid>",
+        "accessToken": "<your access token>",
+        "server": "<https://matrix.your.home.server>",
+        "roomId": "<!roomID:matrix.server>"
+    },
+    "email": {
+        "from": "<from@email.service>",
+        "to": ["<dest!@email.service>", "<dest2@email.service>"],
+        "gpgpubkey": "./config/pub.key",
+        "transporter": {
+            "host": "smtp.youremail.org",
+            "port": 587,
+            "secure": false,
+            "auth": {
+                "user": "...",
+                "pass": "..."
+            }
+        }
     }
 }
