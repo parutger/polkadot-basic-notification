@@ -55,6 +55,8 @@ export class Chainmon {
         this.api = new ApiPromise({ provider: this.provider });
     }
 
+    // This allows us to await for the chain initialization
+    // You can not await a constructor. It also gets the chain name from the api
     async init() {
         await this.api.isReady;
         this.chain = (await this.api.rpc.system.chain()).toString()
@@ -71,6 +73,7 @@ export class Chainmon {
         const blockApi = await this.api.at(blockheader.hash);
         const timestamp = (await blockApi.query.timestamp.now()).toBn().toNumber()
         const events = await blockApi.query.system.events();
+
         const signedBlock = await this.api.rpc.chain.getBlock(blockheader.hash);
         const extrinsics = signedBlock.block.extrinsics;
 
@@ -84,6 +87,11 @@ export class Chainmon {
             extrinsics: extrinsics
         };
         return block;
+    }
+
+    async getHeaderFromBlockNumber(number: number) {
+        const blockHash = await this.api.rpc.chain.getBlockHash(number);
+        return this.api.rpc.chain.getHeader(blockHash);
     }
 }
 

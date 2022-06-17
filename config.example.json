@@ -7,7 +7,6 @@
         "wss://westend-rpc.polkadot.io",
         "wss://westmint-rpc.polkadot.io"
     ],
-    "eventFilter-example1": "all",
     "eventFilter": [
         "balances.Transfer",
         "democracy.Passed"
