@@ -1,5 +1,5 @@
 {
-    "name": "polkadot-bare-notification",
+    "name": "polkadot-notification",
     "version": "1.0.0",
     "main": "dist/index.js",
     "license": "MIT",
