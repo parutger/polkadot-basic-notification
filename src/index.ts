@@ -1,15 +1,15 @@
 import { Config, AppConfig } from "./config"
-import { Chainmon, Report, ExtrinsicItem, EventItem, ReportHTML } from "./chainmon";
-import { Healthprobe } from "./healthprobes";
-import { MatrixReporter } from "./MatrixReporter";
-import { EmailReporter } from "./EmailReporter";
+import { ChainMonitor, Report, ExtrinsicItem, EventItem, ReportHTML } from "./chain_monitor";
+import { Healthprobe } from "./health_probes";
+import { EmailReporter, MatrixReporter } from "./reporters";
 
 import { Header } from "@polkadot/types/interfaces/runtime";
 import "@polkadot/api-augment";
 import "@polkadot/types-augment";
 
+
 async function main() {
-    //Prepare readiness probe, defaults to false.
+    // Prepare readiness probe, defaults to false.
     const readiness = new Healthprobe();
     readiness.listen();
 
@@ -41,15 +41,12 @@ async function main() {
         }
     }
 
-
-
     // This function is passed to the blockhandler and is called every block.
     // Here is the main application logic that determines if a report is created
     // and which extrinsics/events are included
-    //
-    const BlockHandler = async (blockheader: Header, chain: Chainmon) => {
+    const BlockHandler = async (blockHeader: Header, chainMonitor: ChainMonitor) => {
         // Retrieve the data from the block
-        const data = await chain.getBlockData(blockheader);
+        const data = await chainMonitor.getBlockData(blockHeader);
 
         // For each extrinsic
         const extrinsicItems: ExtrinsicItem[] = [];
@@ -101,7 +98,7 @@ async function main() {
         // Create a report if there is anything to.. report.
         if (extrinsicItems.length !== 0 || eventItems.length !== 0) {
             const report: Report = {
-                chain: chain.chain,
+                chain: chainMonitor.chain,
                 blocknumber: data.number,
                 hash: data.hash,
                 timestamp: data.timestamp,
@@ -118,38 +115,17 @@ async function main() {
     };
 
     await Promise.all(
-        //For each endpoint, create a chainmon instance and assign the blockhandler
+        // For each endpoint, create a ChainMonitor instance and assign the blockhandler
         config.endpoints.map(
             async function(endpoint) {
                 try {
-                    // Create a chainmon and initialize it.
-                    const chain = new Chainmon(endpoint);
-                    await chain.init();
+                    // Create a ChainMonitor and initialize it.
+                    const chainMonitor = new ChainMonitor(endpoint);
+                    await chainMonitor.init();
 
-                    // track previous handled blocknumber
-                    let prevblock: number;
-
-                    //Here we use that blockhandler function we made earlier
-                    chain.subscribeHandler(async (blockheader: Header) => {
-
-                        // GrandPa can finalize a few block at once, leading to skipped block in the finalization head.
-                        // This bit checks to see if blocks were skipped, creates an array of all blocknumbers between the last
-                        // blocknumber and the new blocknumber and then blockhandles each one.
-                        if ((blockheader.number.toNumber() - prevblock) != 1 && prevblock != undefined) {
-                            const skipped = (blockheader.number.toNumber() - 1) - prevblock;
-                            const res = Array.from(Array(skipped).keys()).map(x => x + prevblock + 1);
-                            res.map(
-                                async function(blockNumber) {
-                                    const header = await chain.getHeaderFromBlockNumber(blockNumber);
-                                    await BlockHandler(header, chain);
-                                })
-                        }
-
-                        // Handle the new block
-                        await BlockHandler(blockheader, chain);
-
-                        // Sets handled block for next cycle
-                        prevblock = blockheader.number.toNumber();
+                    // Here we use that blockhandler function we made earlier
+                    chainMonitor.subscribeHandler(async (blockHeader: Header) => {
+                        await BlockHandler(blockHeader, chainMonitor);
                     });
                 } catch (error) {
                     console.error("Listener broke: %s", error)

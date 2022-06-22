@@ -2,8 +2,8 @@ import yargs from "yargs";
 import { readFileSync } from 'fs';
 import { Address } from "@polkadot/types/interfaces/runtime";
 
-import { EmailConfig } from './EmailReporter';
-import { MatrixConfig } from './MatrixReporter';
+import { EmailConfig } from './reporters/email';
+import { MatrixConfig } from './reporters/matrix';
 
 export interface ExtendedAccount {
     address: Address,

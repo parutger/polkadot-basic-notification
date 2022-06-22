@@ -30,7 +30,6 @@ export class EmailReporter {
         this.transporter = transporter;
         this.from = config.from;
         this.to = config.to;
-        //logger.info(`✅ registering email reporter from ${this.from} to ${this.to}.`)
     }
 
     async maybeEncrypt(message: string): Promise<string> {
@@ -39,7 +38,6 @@ export class EmailReporter {
                 message: await openpgp.createMessage({ text: message }),
                 encryptionKeys: this.maybePubkey,
             })
-            // Todo: fix?
             return enc as string;
         } else {
             return message
@@ -48,7 +46,6 @@ export class EmailReporter {
 
     async verify(): Promise<boolean> {
         const outcome = await this.transporter.verify();
-        //logger.debug(`email verification ${outcome}`)
         return outcome;
     }
 

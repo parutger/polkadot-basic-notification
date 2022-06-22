@@ -23,7 +23,6 @@ export class MatrixReporter {
         this.roomId = config.roomId;
 
         logger.setLevel(log.levels.INFO, false);
-        //console.info(`registering matrix reporter from ${config.userId} to ${this.roomId}@${config.server}.`)
     }
 
     async sendHTML(message: string): Promise<void> {
