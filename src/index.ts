@@ -1,7 +1,7 @@
 import { Config, AppConfig } from "./config"
-import { ChainMonitor, Report, ExtrinsicItem, EventItem, ReportHTML } from "./chain_monitor";
+import { ChainMonitor, Report, ExtrinsicItem, EventItem } from "./chain_monitor";
 import { Healthprobe } from "./health_probes";
-import { EmailReporter, MatrixReporter } from "./reporters";
+import { Reporter, EmailReporter, MatrixReporter } from "./reporters";
 
 import { Header } from "@polkadot/types/interfaces/runtime";
 import "@polkadot/api-augment";
@@ -21,25 +21,26 @@ async function main() {
         process.exit(1);
     }
 
-    let matrix: MatrixReporter;
+    const reporters: Reporter[] = [];
+
     if (config.matrix !== undefined) {
         try {
-            matrix = new MatrixReporter(config.matrix);
+            reporters.push(new MatrixReporter(config.matrix));
         } catch (error) {
             console.error("Unable to connect to Matrix: ", error);
             process.exit(1);
         }
     }
 
-    let email: EmailReporter;
     if (config.email !== undefined) {
         try {
-            email = new EmailReporter(config.email);
+            reporters.push(new EmailReporter(config.email));
         } catch (error) {
             console.error("Error while setting up Email: ", error);
             process.exit(1);
         }
     }
+
 
     // This function is passed to the blockhandler and is called every block.
     // Here is the main application logic that determines if a report is created
@@ -105,12 +106,8 @@ async function main() {
                 extrinsics: extrinsicItems,
                 events: eventItems,
             }
-            // Make a pretty html and send it to the matrix channel
-            const message = ReportHTML(report);
-
-            const subject = `${report.chain} notification at ${report.blocknumber}`;
-            if (config.email != undefined) email.sendEmail(subject, message);
-            if (config.matrix != undefined) matrix.sendHTML(message);
+            // For each reporter, call sendReport
+            await Promise.all(reporters.map((reporter) => reporter.sendReport(report)))
         }
     };
 

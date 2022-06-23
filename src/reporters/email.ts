@@ -3,6 +3,8 @@ import { readFileSync } from 'fs'
 import * as nodemailer from "nodemailer";
 import * as openpgp from 'openpgp';
 
+import { ReportHTML, Report, Reporter } from "./index"
+
 export interface EmailConfig {
     from: string,
     to: string[],
@@ -10,7 +12,7 @@ export interface EmailConfig {
     transporter: any
 }
 
-export class EmailReporter {
+export class EmailReporter implements Reporter {
     maybePubkey: openpgp.Key | undefined;
     transporter: nodemailer.Transporter;
     from: string;
@@ -49,13 +51,16 @@ export class EmailReporter {
         return outcome;
     }
 
-    async sendEmail(subject: string, text: string): Promise<void> {
+    async sendReport(report: Report): Promise<void> {
+        const html = ReportHTML(report)
+        const subject = `${report.chain} notification at ${report.blocknumber}`;
+
         await Promise.all(this.to.map(async (to) =>
             this.transporter.sendMail({
                 from: this.from,
                 to,
                 subject,
-                html: await this.maybeEncrypt(text),
+                html: await this.maybeEncrypt(html),
             })
         ));
     }
