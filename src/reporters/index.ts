@@ -8,9 +8,7 @@ export interface Reporter {
     sendReport(report: Report): Promise<void>;
 }
 
-
 export function ReportHTML(report: Report) {
-
     const header = `<p>
         <p>📣 <b> Notification</b> at ${report.chain}
             <a href='https://${report.chain}.subscan.io/block/${report.blocknumber}'>#${report.blocknumber}</a>

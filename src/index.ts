@@ -1,11 +1,13 @@
 import { Config, AppConfig } from "./config"
 import { ChainMonitor, Report, ExtrinsicItem, EventItem } from "./chain_monitor";
 import { Healthprobe } from "./health_probes";
-import { Reporter, EmailReporter, MatrixReporter } from "./reporters";
+import { Reporter } from "./reporters";
 
 import { Header } from "@polkadot/types/interfaces/runtime";
 import "@polkadot/api-augment";
 import "@polkadot/types-augment";
+
+
 
 
 async function main() {
@@ -13,36 +15,11 @@ async function main() {
     const readiness = new Healthprobe();
     readiness.listen();
 
-    let config: AppConfig;
-    try {
-        config = new Config().config;
-    } catch (error) {
-        console.error("Unable to parse config: ", error);
-        process.exit(1);
-    }
+    const configurator = new Config()
+    const config: AppConfig = configurator.config;
+    const reporters: Reporter[] = configurator.getReporters();
 
-    const reporters: Reporter[] = [];
-
-    if (config.matrix !== undefined) {
-        try {
-            reporters.push(new MatrixReporter(config.matrix));
-        } catch (error) {
-            console.error("Unable to connect to Matrix: ", error);
-            process.exit(1);
-        }
-    }
-
-    if (config.email !== undefined) {
-        try {
-            reporters.push(new EmailReporter(config.email));
-        } catch (error) {
-            console.error("Error while setting up Email: ", error);
-            process.exit(1);
-        }
-    }
-
-
-    // This function is passed to the blockhandler and is called every block.
+    // This function is passed to chainMonitor.subscribeHandler and is called every block.
     // Here is the main application logic that determines if a report is created
     // and which extrinsics/events are included
     const BlockHandler = async (blockHeader: Header, chainMonitor: ChainMonitor) => {
@@ -110,6 +87,7 @@ async function main() {
             await Promise.all(reporters.map((reporter) => reporter.sendReport(report)))
         }
     };
+    // End of BlockHandler
 
     await Promise.all(
         // For each endpoint, create a ChainMonitor instance and assign the blockhandler

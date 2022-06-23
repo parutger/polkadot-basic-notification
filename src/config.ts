@@ -5,6 +5,8 @@ import { Address } from "@polkadot/types/interfaces/runtime";
 import { EmailConfig } from './reporters/email';
 import { MatrixConfig } from './reporters/matrix';
 
+import { Reporter, EmailReporter, MatrixReporter } from "./reporters";
+
 export interface ExtendedAccount {
     address: Address,
     label: string
@@ -55,6 +57,33 @@ export class Config {
             this.config.matrix.accessToken = process.env.MATRIX_TOKEN || this.config.matrix.accessToken;
         }
     }
+
+    getReporters() {
+        const reporters: Reporter[] = [];
+
+        if (this.config.matrix !== undefined) {
+            try {
+                reporters.push(new MatrixReporter(this.config.matrix));
+            } catch (error) {
+                console.error("Unable to connect to Matrix: ", error);
+                process.exit(1);
+            }
+        }
+
+        if (this.config.email !== undefined) {
+            try {
+                reporters.push(new EmailReporter(this.config.email));
+            } catch (error) {
+                console.error("Error while setting up Email: ", error);
+                process.exit(1);
+            }
+        }
+
+        return reporters;
+    }
+
+
+
 
 }
 
