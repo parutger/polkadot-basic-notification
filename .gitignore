@@ -1,9 +1,6 @@
-.vscode
+.env
+.idea
+config.json*
+config/*
+dist
 node_modules
-key
-build
-.DS_Store
-config.json
-*.log
-*.key
-config*.json
