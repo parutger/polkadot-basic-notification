@@ -30,28 +30,36 @@ async function main() {
         const extrinsicItems: ExtrinsicItem[] = [];
         data.extrinsics.forEach((extrinsic, index) => {
             if (extrinsic.isSigned === true) {
-                // if accounts is not empty,  and extrinsic.signer.value) is not found in the accounts addresses, skip this one
+                // IF accounts array is not empty,
+                // AND extrinsic.signer is not found in the accounts addresses,
+                // AND extrinsic plaintext does not contain monitored addresses
+                // THEN skip this one
                 if (config.accounts.length !== 0 &&
-                    (config.accounts.some((obj) => { return obj.address == extrinsic.signer; }) === false)
+                    (config.accounts.some((obj) => { return obj.address == extrinsic.signer; }) === false) &&
+                    (config.accounts.find((e) => extrinsic.toString().includes(e.address.toString())) === undefined)
                 ) return;
-
-                // Grab the label for the account
-                const label = config.accounts.find(t => t.address == extrinsic.signer)?.label;
-                // Populate item
-                const item: ExtrinsicItem = {
-                    index: index,
-                    section: extrinsic.method.section.toString(),
-                    method: extrinsic.method.method.toString(),
-                    account: {
-                        address: extrinsic.signer,
-                        label: label ?? "unlabeled"
-                    },
-
-                };
-                // Log to stdout and add to report
-                console.log(JSON.stringify(item));
-                extrinsicItems.push(item);
+                // If the extrinsic is NOT signed, check if account is anywhere in the extrinsic plaintext
+            } else if (config.accounts.find((e) => extrinsic.toString().includes(e.address.toString())) === undefined) {
+                return;
             }
+
+            // Grab the label for the account
+            const label = config.accounts.find(t => t.address == extrinsic.signer)?.label;
+            // Populate item
+            const item: ExtrinsicItem = {
+                index: index,
+                section: extrinsic.method.section.toString(),
+                method: extrinsic.method.method.toString(),
+                account: {
+                    address: extrinsic.signer,
+                    label: label ?? "Monitored Account is Recipient"
+                },
+                data: JSON.stringify(extrinsic.toHuman()),
+            };
+
+            // Add to report
+            extrinsicItems.push(item);
+
         });
 
         // For each Event
@@ -65,11 +73,10 @@ async function main() {
             const item: EventItem = {
                 section: event.event.section.toString(),
                 method: event.event.method.toString(),
-                data: event.event.data.toJSON(),
+                data: JSON.stringify(event.event.toHuman()),
             };
 
-            // Log to stdout and add to report
-            console.log(JSON.stringify(item));
+            // Add to report
             eventItems.push(item);
         }
 

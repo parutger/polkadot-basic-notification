@@ -6,20 +6,20 @@ import { GenericExtrinsic } from "@polkadot/types/"
 import "@polkadot/api-augment";
 import "@polkadot/types-augment";
 
-const DEBUG = true;
+const DEBUG = false;
 
 export interface ExtrinsicItem {
     index: number,
     section: string,
     method: string,
     account: ExtendedAccount,
+    data: string
 }
 
 export interface EventItem {
     section: string,
     method: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any, // any is correct for now because it's a mutable type
+    data: string,
 }
 
 // This holds the raw blockdata,
@@ -90,7 +90,7 @@ export class ChainMonitor {
                     })
             }
 
-            console.log(`${this.chain}: handling ${header.number.toNumber()}`);
+            if (DEBUG) console.log(`${this.chain}: handling ${header.number.toNumber()}`);
             // Run the handler we got as an argument, on the blockheader
             handler(header);
 

@@ -2,10 +2,13 @@
     "name": "polkadot-notification",
     "version": "1.0.0",
     "main": "dist/index.js",
-    "license": "MIT",
+    "license": "ISC",
+    "author": "@kianenigma",
     "scripts": {
         "build": "tsc",
-        "lint": "npx eslint src --ext .ts --fix"
+        "lint": "npx eslint src --ext .ts --fix",
+        "start": "node dist/index.js -c config/config.json",
+        "bs": "npm run build && node dist/index.js -c config/config.json"
     },
     "devDependencies": {
         "@tsconfig/node16": "^1.0.2",

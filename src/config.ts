@@ -5,11 +5,11 @@ import { Address } from "@polkadot/types/interfaces/runtime";
 import { EmailConfig } from './reporters/email';
 import { MatrixConfig } from './reporters/matrix';
 
-import { Reporter, EmailReporter, MatrixReporter } from "./reporters";
+import { Reporter, ConsoleReporter, EmailReporter, MatrixReporter } from "./reporters";
 
 export interface ExtendedAccount {
     address: Address,
-    label: string
+    label: string,
 }
 
 export interface AppConfig {
@@ -78,6 +78,8 @@ export class Config {
                 process.exit(1);
             }
         }
+
+        reporters.push(new ConsoleReporter());
 
         return reporters;
     }

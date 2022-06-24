@@ -2,6 +2,7 @@ import { Report } from "../chain_monitor";
 
 export { MatrixReporter } from "./matrix";
 export { EmailReporter } from "./email";
+export { ConsoleReporter } from "./console";
 export type { Report } from "../chain_monitor";
 
 export interface Reporter {
@@ -21,7 +22,11 @@ export function ReportHTML(report: Report) {
             <li>
                Extrinsic <a href='https://${report.chain}.subscan.io/extrinsic/${report.blocknumber}-${item.index}'>#${report.blocknumber}-${item.index}</a></br>
                | <b style='background-color: #a3e4d7'> ${item.account.address.toString()} </b> ${item.account.label}
-               | method: <b style="background-color: #a3e4d7" > ${item.section}.${item.method} </b>
+               | method: <b style="background-color: #a3e4d7" > ${item.section}.${item.method} </b></br>
+               <details>
+               <summary>Details</summary>
+               <code> ${item.data} </code>
+               </details>
             </li>`);
     }
 
@@ -30,7 +35,10 @@ export function ReportHTML(report: Report) {
         listEvents = report.events.map((item) => `
             <li>
                Event | method: <b style="background-color: #a3e4d7" > ${item.section}.${item.method} </b></br>
-               Data | ${JSON.stringify(item.data)}
+               <details>
+               <summary>Details</summary>
+               <code> ${item.data} </code>
+               </details>
             </li>`);
     }
 
