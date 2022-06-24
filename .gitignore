@@ -1,6 +1,12 @@
 .env
 .idea
-config.json*
 config/*
 dist
 node_modules
+key
+build
+.DS_Store
+*.log
+*.key
+config*.json
+.vscode
