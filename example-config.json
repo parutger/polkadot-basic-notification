@@ -11,6 +11,7 @@
         "balances.Transfer",
         "democracy.Passed"
     ],
+    "consolereports": true,
     "matrix": {
         "userId": "<your userid>",
         "accessToken": "<your access token>",

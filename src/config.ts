@@ -17,7 +17,8 @@ export interface AppConfig {
     accounts: ExtendedAccount[],
     eventFilter: "all" | string[],
     matrix?: MatrixConfig,
-    email?: EmailConfig
+    email?: EmailConfig,
+    consolereports?: boolean,
 }
 
 export class Config {
@@ -79,7 +80,9 @@ export class Config {
             }
         }
 
-        reporters.push(new ConsoleReporter());
+        if (this.config.consolereports !== undefined && this.config.consolereports === true) {
+            reporters.push(new ConsoleReporter());
+        }
 
         return reporters;
     }
