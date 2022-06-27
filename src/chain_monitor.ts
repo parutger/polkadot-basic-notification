@@ -24,7 +24,7 @@ export interface EventItem {
 
 // This holds the raw blockdata,
 // the blockhandler extracts relevant data into a "Report" item.
-export interface blockData {
+export interface BlockData {
     chain: string,
     number: number,
     hash: Hash,
@@ -43,12 +43,10 @@ export interface Report {
     events?: EventItem[],
 }
 
-
 export class ChainMonitor {
     private provider!: WsProvider;
     private api!: ApiPromise;
     chain!: string;
-
 
     constructor(
         private rpcEndpoint: string
@@ -64,7 +62,7 @@ export class ChainMonitor {
         this.chain = (await this.api.rpc.system.chain()).toString()
     }
 
-    // todo: define function interface
+    // Connect a blockhandler function to the subscribeFinalizedHeads
     async subscribeHandler(handler: (h: Header) => void) {
         let prevblock: number | undefined = undefined;
 
@@ -108,7 +106,7 @@ export class ChainMonitor {
         const extrinsics = signedBlock.block.extrinsics;
 
         // downstream functions need these values.
-        const block: blockData = {
+        const block: BlockData = {
             chain: this.chain,
             number: blockheader.number.toNumber(),
             hash: blockheader.hash,

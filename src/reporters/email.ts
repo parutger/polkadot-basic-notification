@@ -64,5 +64,4 @@ export class EmailReporter implements Reporter {
             })
         ));
     }
-
 }

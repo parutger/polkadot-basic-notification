@@ -1,12 +1,11 @@
 import { createServer, Server } from 'http';
 
-/* 
+/*
  * This is a very simplified readiness probe that responds to any url with a status code
- * Can be further extended to provide metrics and 
+ * Can be further extended to provide metrics and
  */
 
 export class Healthprobe {
-
     private port = 3000;
     private server: Server;
 

@@ -16,14 +16,19 @@ export interface AppConfig {
     endpoints: string[],
     accounts: ExtendedAccount[],
     eventFilter: "all" | string[],
-    matrix?: MatrixConfig,
+    reporters: ReportersConfig;
+}
+
+interface ReportersConfig {
     email?: EmailConfig,
-    consolereports?: boolean,
+    matrix?: MatrixConfig,
+    console?: boolean,
 }
 
 export class Config {
 
     config: AppConfig;
+    reporters: Reporter[] = [];
 
     constructor() {
         const argv = yargs(process.argv.slice(2))
@@ -38,6 +43,7 @@ export class Config {
             process.exit(1);
         }
 
+        // Read configuration from file
         this.config = JSON.parse(readFileSync(argv.c).toString());
 
 
@@ -52,43 +58,35 @@ export class Config {
             console.warn("No 'eventFilter' section found in config, defaulting to 'all'");
             this.config.eventFilter = "all"
         }
+
         // Matrix
-        // Environment variable overwrites config entry
-        if (typeof process.env.MATRIX_TOKEN !== undefined && this.config.matrix !== undefined) {
-            this.config.matrix.accessToken = process.env.MATRIX_TOKEN || this.config.matrix.accessToken;
-        }
-    }
-
-    getReporters() {
-        const reporters: Reporter[] = [];
-
-        if (this.config.matrix !== undefined) {
+        if (this.config.reporters.matrix !== undefined) {
             try {
-                reporters.push(new MatrixReporter(this.config.matrix));
+                if (typeof process.env.MATRIX_TOKEN !== undefined) {
+                    this.config.reporters.matrix.accessToken = process.env.MATRIX_TOKEN || this.config.reporters.matrix.accessToken;
+                }
+                this.reporters.push(new MatrixReporter(this.config.reporters.matrix));
             } catch (error) {
                 console.error("Unable to connect to Matrix: ", error);
                 process.exit(1);
             }
         }
 
-        if (this.config.email !== undefined) {
+        // Email
+        if (this.config.reporters.email !== undefined) {
             try {
-                reporters.push(new EmailReporter(this.config.email));
+                this.reporters.push(new EmailReporter(this.config.reporters.email));
             } catch (error) {
                 console.error("Error while setting up Email: ", error);
                 process.exit(1);
             }
         }
 
-        if (this.config.consolereports !== undefined && this.config.consolereports === true) {
-            reporters.push(new ConsoleReporter());
+        // Console
+        if (this.config.reporters.console !== undefined && this.config.reporters.console === true) {
+            this.reporters.push(new ConsoleReporter());
         }
 
-        return reporters;
     }
-
-
-
-
 }
 

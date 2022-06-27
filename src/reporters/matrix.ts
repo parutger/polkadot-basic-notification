@@ -45,4 +45,3 @@ export class MatrixReporter implements Reporter {
         await this.client.sendEvent(this.roomId, "m.room.message", content);
     }
 }
-

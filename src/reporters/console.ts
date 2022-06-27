@@ -1,10 +1,9 @@
 import { Report, Reporter } from "./index"
 
-
 export class ConsoleReporter implements Reporter {
     async sendReport(report: Report): Promise<void> {
         report.extrinsics?.map((e) => {
-            let ex = {
+            const ex = {
                 chain: report.chain,
                 block: report.blocknumber,
                 data: JSON.parse(e.data),
@@ -12,7 +11,7 @@ export class ConsoleReporter implements Reporter {
             console.log(JSON.stringify(ex));
         });
         report.events?.map((e) => {
-            let ev = {
+            const ev = {
                 chain: report.chain,
                 block: report.blocknumber,
                 data: JSON.parse(e.data),
@@ -20,5 +19,4 @@ export class ConsoleReporter implements Reporter {
             console.log(JSON.stringify(ev));
         });
     }
-
 }

@@ -1,14 +1,10 @@
 import { Config, AppConfig } from "./config"
 import { ChainMonitor, Report, ExtrinsicItem, EventItem } from "./chain_monitor";
 import { Healthprobe } from "./health_probes";
-import { Reporter } from "./reporters";
 
 import { Header } from "@polkadot/types/interfaces/runtime";
 import "@polkadot/api-augment";
 import "@polkadot/types-augment";
-
-
-
 
 async function main() {
     // Prepare readiness probe, defaults to false.
@@ -17,12 +13,11 @@ async function main() {
 
     const configurator = new Config()
     const config: AppConfig = configurator.config;
-    const reporters: Reporter[] = configurator.getReporters();
 
     // This function is passed to chainMonitor.subscribeHandler and is called every block.
     // Here is the main application logic that determines if a report is created
     // and which extrinsics/events are included
-    const BlockHandler = async (blockHeader: Header, chainMonitor: ChainMonitor) => {
+    async function BlockHandler(blockHeader: Header, chainMonitor: ChainMonitor): Promise<void> {
         // Retrieve the data from the block
         const data = await chainMonitor.getBlockData(blockHeader);
 
@@ -59,7 +54,6 @@ async function main() {
 
             // Add to report
             extrinsicItems.push(item);
-
         });
 
         // For each Event
@@ -91,10 +85,9 @@ async function main() {
                 events: eventItems,
             }
             // For each reporter, call sendReport
-            await Promise.all(reporters.map((reporter) => reporter.sendReport(report)))
+            await Promise.all(configurator.reporters.map((reporter) => reporter.sendReport(report)))
         }
-    };
-    // End of BlockHandler
+    } // End of BlockHandler
 
     await Promise.all(
         // For each endpoint, create a ChainMonitor instance and assign the blockhandler
