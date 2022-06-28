@@ -1,21 +1,17 @@
 import yargs from "yargs";
 import { readFileSync } from 'fs';
-import { Address } from "@polkadot/types/interfaces/runtime";
 
+import { ExtendedAccount } from "./chain_monitor"
 import { EmailConfig } from './reporters/email';
 import { MatrixConfig } from './reporters/matrix';
 
 import { Reporter, ConsoleReporter, EmailReporter, MatrixReporter } from "./reporters";
 
-export interface ExtendedAccount {
-    address: Address,
-    label: string,
-}
-
 export interface AppConfig {
     endpoints: string[],
     accounts: ExtendedAccount[],
-    eventFilter: "all" | string[],
+    eventFilter: string[],
+    extrinsicFilter: string[],
     reporters: ReportersConfig;
 }
 
@@ -55,8 +51,14 @@ export class Config {
 
         // EventFilter
         if (this.config.eventFilter == undefined) {
-            console.warn("No 'eventFilter' section found in config, defaulting to 'all'");
-            this.config.eventFilter = "all"
+            console.warn("No 'eventFilter' section found in config, defaulting to '[]'");
+            this.config.eventFilter = []
+        }
+
+        // ExtrinsicFilter
+        if (this.config.extrinsicFilter == undefined) {
+            console.warn("No 'extrinsicFilter' section found in config, defaulting to '[]'");
+            this.config.extrinsicFilter = []
         }
 
         // Matrix

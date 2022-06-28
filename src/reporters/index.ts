@@ -18,23 +18,26 @@ export function ReportHTML(report: Report) {
 
     let listExtrinsics: string[] = [];
     if (typeof report.extrinsics !== 'undefined') {
-        listExtrinsics = report.extrinsics.map((item) => `
-            <li>
+        listExtrinsics = report.extrinsics.map((item) => {
+            // Populate item, but remove the args due to maximum message size.
+            const truncatedData = JSON.parse(item.data);
+            delete truncatedData.method?.args;
+            return `<li>
                Extrinsic <a href='https://${report.chain}.subscan.io/extrinsic/${report.blocknumber}-${item.index}'>#${report.blocknumber}-${item.index}</a></br>
-               | <b style='background-color: #a3e4d7'> ${item.account.address.toString()} </b> ${item.account.label}
-               | method: <b style="background-color: #a3e4d7" > ${item.section}.${item.method} </b></br>
+               ${item.account?.address ? item.account?.address?.toString() : ''} ${item.account?.label || ''}
+               | method: <b>${item.section}.${item.method}</b></br>
                <details>
                <summary>Details</summary>
-               <code> ${item.data} </code>
+               <code> ${JSON.stringify(truncatedData)} </code>
                </details>
-            </li>`);
+            </li>`});
     }
 
     let listEvents: string[] = [];
     if (typeof report.events !== 'undefined') {
         listEvents = report.events.map((item) => `
             <li>
-               Event | method: <b style="background-color: #a3e4d7" > ${item.section}.${item.method} </b></br>
+               Event | method: <b>${item.section}.${item.method}</b></br>
                <details>
                <summary>Details</summary>
                <code> ${item.data} </code>
@@ -43,11 +46,7 @@ export function ReportHTML(report: Report) {
     }
 
     const footer = `
-        </ul>
-        <details>
-        <summary>Raw details </summary>
-        <code> ${JSON.stringify(report.extrinsics)} ${JSON.stringify(report.events)} </code>
-        </details>`;
+        </ul>`;
 
     return header + listExtrinsics + listEvents + footer;
 }

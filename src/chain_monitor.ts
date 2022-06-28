@@ -1,6 +1,5 @@
-import { ExtendedAccount } from "./config"
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { Hash, Header } from "@polkadot/types/interfaces/runtime";
+import { Address, Hash, Header } from "@polkadot/types/interfaces/runtime";
 import { GenericExtrinsic } from "@polkadot/types/"
 
 import "@polkadot/api-augment";
@@ -8,11 +7,15 @@ import "@polkadot/types-augment";
 
 const DEBUG = false;
 
+export interface ExtendedAccount {
+    address?: Address,
+    label: string,
+}
 export interface ExtrinsicItem {
     index: number,
     section: string,
     method: string,
-    account: ExtendedAccount,
+    account?: ExtendedAccount,
     data: string
 }
 
@@ -117,5 +120,3 @@ export class ChainMonitor {
         return block;
     }
 }
-
-

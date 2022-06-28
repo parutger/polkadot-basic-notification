@@ -21,34 +21,35 @@ async function main() {
         // Retrieve the data from the block
         const data = await chainMonitor.getBlockData(blockHeader);
 
-        // For each extrinsic
+        // Prepare empty list for report
         const extrinsicItems: ExtrinsicItem[] = [];
+
+        // For each extrinsic
         data.extrinsics.forEach((extrinsic, index) => {
-            if (extrinsic.isSigned === true) {
-                // IF accounts array is not empty,
-                // AND extrinsic.signer is not found in the accounts addresses,
-                // AND extrinsic plaintext does not contain monitored addresses
-                // THEN skip this one
-                if (config.accounts.length !== 0 &&
-                    (config.accounts.some((obj) => { return obj.address == extrinsic.signer; }) === false) &&
-                    (config.accounts.find((e) => extrinsic.toString().includes(e.address.toString())) === undefined)
-                ) return;
-                // If the extrinsic is NOT signed, check if account is anywhere in the extrinsic plaintext
-            } else if (config.accounts.find((e) => extrinsic.toString().includes(e.address.toString())) === undefined) {
+
+            // extrinsicName is "section.Method"
+            const extrinsicFound = config.extrinsicFilter.some((obj) => {
+                return obj === extrinsic.method.section.toString() + "." + extrinsic.method.method.toString();
+            })
+            if (config.extrinsicFilter.length !== 0 && extrinsicFound == false) {
                 return;
             }
 
-            // Grab the label for the account
-            const label = config.accounts.find(t => t.address == extrinsic.signer)?.label;
-            // Populate item
+            // Check if the extrinsic plaintexts holds any of the monitored addresses
+            const relatedAccount = config.accounts.find((e) => {
+                if (e.address !== undefined) return extrinsic.toString().includes(e.address.toString());
+            });
+
+            // If config accounts is empty, we want to process each extrinsic
+            if (config.accounts.length !== 0 && relatedAccount == undefined) {
+                return;
+            }
+
             const item: ExtrinsicItem = {
                 index: index,
                 section: extrinsic.method.section.toString(),
                 method: extrinsic.method.method.toString(),
-                account: {
-                    address: extrinsic.signer,
-                    label: label ?? "Monitored Account is Recipient"
-                },
+                account: relatedAccount,
                 data: JSON.stringify(extrinsic.toHuman()),
             };
 
@@ -59,8 +60,8 @@ async function main() {
         // For each Event
         const eventItems: EventItem[] = [];
         for (const event of data.events) {
-            // if eventFilter is NOT "all" and the event is not in eventFilter: Skip
-            if (config.eventFilter !== "all" &&
+            // if eventFilter is NOT empty and the event is not in eventFilter: Skip
+            if (config.eventFilter !== [] &&
                 (config.eventFilter.some((obj) => { return obj === event.event.section + "." + event.event.method; }) === false)
             ) continue;
 
