@@ -52,9 +52,8 @@ export class Config {
             // Matrix
             if (this.config.reporters.matrix !== undefined) {
                 try {
-                    if (typeof process.env.MATRIX_TOKEN !== undefined) {
-                        this.config.reporters.matrix.accessToken = process.env.MATRIX_TOKEN || this.config.reporters.matrix.accessToken;
-                    }
+                    this.config.reporters.matrix.userId = process.env.MATRIX_USERID || this.config.reporters.matrix.userId;
+                    this.config.reporters.matrix.accessToken = process.env.MATRIX_ACCESSTOKEN || this.config.reporters.matrix.accessToken;
                     this.reporters.push(new MatrixReporter(this.config.reporters.matrix));
                 } catch (error) {
                     console.error("Error connecting to Matrix: ", error);
