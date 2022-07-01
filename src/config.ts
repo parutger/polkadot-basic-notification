@@ -44,23 +44,10 @@ export class Config {
             // Read configuration from either JSON or YAML file
             this.config = yaml.load(readFileSync(argv.c, 'utf8')) as AppConfig;
 
-            // Accounts Filter
-            if (this.config.accounts == undefined) {
-                console.warn("No 'accounts' section found in config, defaulting to '[]'");
-                this.config.accounts = []
-            }
-
-            // EventFilter
-            if (this.config.eventFilter == undefined) {
-                console.warn("No 'eventFilter' section found in config, defaulting to '[]'");
-                this.config.eventFilter = []
-            }
-
-            // ExtrinsicFilter
-            if (this.config.extrinsicFilter == undefined) {
-                console.warn("No 'extrinsicFilter' section found in config, defaulting to '[]'");
-                this.config.extrinsicFilter = []
-            }
+            // Defaults when not defined in config file
+            this.config.accounts = this.config.accounts || [];
+            this.config.eventFilter = this.config.eventFilter || [];
+            this.config.extrinsicFilter = this.config.extrinsicFilter || [];
 
             // Matrix
             if (this.config.reporters.matrix !== undefined) {
@@ -70,7 +57,7 @@ export class Config {
                     }
                     this.reporters.push(new MatrixReporter(this.config.reporters.matrix));
                 } catch (error) {
-                    console.error("Unable to connect to Matrix: ", error);
+                    console.error("Error connecting to Matrix: ", error);
                     process.exit(1);
                 }
             }
