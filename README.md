@@ -19,13 +19,13 @@ Any of such events creates a `report`. Any block that contains a non-zero number
 passed to an arbitrary number of `Reporter`s for delivery. The `Reporter`s are essentially the
 transport mechanism, i.e. how you want to be notified. Current implementations are:
 
-1. Matrix, using `matrix-js-sdk`.
-2. Email, optionally supporting GPG encryption as well.
-4. Console, for use in for log aggregators
+* Matrix, using `matrix-js-sdk`.
+* Email, optionally supporting GPG encryption as well.
+* Console, for use in for log aggregators
 
-## How to use
+## Configuration
 
-You need to provide one configuration file to the program, which specifies 3 things:
+You need to provide one configuration file to the program, which specifies these things:
 
 1. which accounts you want to monitor.
 2. which chains you want to monitor.
@@ -34,6 +34,7 @@ You need to provide one configuration file to the program, which specifies 3 thi
 
 A documented examples is as follows:
 
+### javascript
 ```javascript
 {
   // The list of addresses you want to monitor.
@@ -99,7 +100,32 @@ A documented examples is as follows:
 
 ```
 
-You can mix and match different reporters with different configs together.
+### YAML
+```YAML
+accounts:
+  - address: "<ss58_address>"
+    label: "<account_nickname>"
+  - address: "<ss58_address>"
+    label: "<account_nickname>"
+endpoints:
+  - "wss://rpc.polkadot.io"
+  - "wss://statemine-rpc.polkadot.io"
+  - "wss://acala-polkadot.api.onfinality.io/public-ws"
+  - "wss://wss.api.moonbeam.network"
+  - "wss://ws.azero.dev"
+extrinsicFilter: []
+eventFilter:
+  - "system.CodeUpdated"
+  - "democracy.Passed"
+  - "imonline.SomeOffline"
+reporters:
+  console: true
+  matrix:
+    userId: "<your userid>"
+    accessToken: "<your access token>"
+    server: "<https://matrix.your.home.server>"
+    roomId: "<!roomID:matrix.server>"
+```
 
 ## Deployment
 
