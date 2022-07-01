@@ -104,7 +104,10 @@ async function main() {
                         await BlockHandler(blockHeader, chainMonitor);
                     });
                 } catch (error) {
-                    console.error("Listener broke: %s", error)
+                    // There is an edge-case where the listener does not reconnect.
+                    // For now, just exit and let the OS restart the app/container.
+                    console.error("Critical Error: ChainMonitor Crashed! \n %s", error)
+                    process.exit(1);
                 }
             }
         )
