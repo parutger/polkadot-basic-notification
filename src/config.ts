@@ -1,5 +1,6 @@
 import yargs from "yargs";
 import { readFileSync } from 'fs';
+import * as yaml from 'js-yaml';
 
 import { ExtendedAccount } from "./chain_monitor"
 import { EmailConfig } from './reporters/email';
@@ -30,7 +31,7 @@ export class Config {
         const argv = yargs(process.argv.slice(2))
             .option('c', {
                 type: 'string',
-                description: 'path to a JSON file with your config in it.',
+                description: 'path to a JSON or YAML config file.',
                 default: process.env.APP_CONFIG_FILE,
             }).parseSync();
 
@@ -39,9 +40,8 @@ export class Config {
             process.exit(1);
         }
 
-        // Read configuration from file
-        this.config = JSON.parse(readFileSync(argv.c).toString());
-
+        // Read configuration from either JSON or YAML file
+        this.config = yaml.load(readFileSync(argv.c, 'utf8')) as AppConfig;
 
         // Accounts Filter
         if (this.config.accounts == undefined) {
@@ -91,4 +91,3 @@ export class Config {
 
     }
 }
-
