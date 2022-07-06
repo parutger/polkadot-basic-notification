@@ -36,8 +36,9 @@ async function main() {
             }
 
             // Check if the extrinsic plaintexts holds any of the monitored addresses
+            const extrinsicPlaintext = extrinsic.toString();
             const relatedAccount = config.accounts.find((e) => {
-                if (e.address !== undefined) return extrinsic.toString().includes(e.address.toString());
+                if (e.address !== undefined) return extrinsicPlaintext.includes(e.address.toString());
             });
 
             // If config accounts is empty, we want to process each extrinsic
